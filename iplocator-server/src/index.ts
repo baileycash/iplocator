@@ -4,14 +4,14 @@ var indexRouter = require("./routes/index");
 
 var app = express();
 const port = 3000;
-app.use(logger("dev"));
+app.use(logger(":method :status :res[content-length] - :response-time ms"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 app.use("/", indexRouter);
 
 app.listen(port, () => {
-  console.log(`App running`);
+  console.log(`App listening on ${port}`);
 });
 
 module.exports = app;

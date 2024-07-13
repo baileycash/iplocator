@@ -1,11 +1,14 @@
 import { Request, Response, Router } from "express";
 import geo from "../lib/geo";
+import logger from "../lib/logger";
 
 const router = Router();
 
 router.get("/", async function (req: Request, res: Response) {
   const { ip: reqIp, whiteList } = req.body;
   let ip = "";
+
+  logger(`Incoming request: ${req.body}`);
 
   try {
     const ipArr = reqIp.split(".");
@@ -14,37 +17,33 @@ router.get("/", async function (req: Request, res: Response) {
     } else {
       res.status(400);
       res.send({
-        message: "IP address is invalid",
+        error: "IP address is invalid",
       });
     }
   } catch (e) {
     res.status(500);
     res.send({
-      message: "Error parsing IP address",
+      error: "Error parsing IP address",
     });
   }
 
   if (!ip) {
     res.status(400);
     res.send({
-      message: "IP address [ip] not provided",
+      error: "IP address [ip] not provided",
     });
   }
 
   if (!Array.isArray(whiteList) || req.body?.whiteList?.length < 1) {
     res.status(400);
     res.send({
-      message: "Whitelist [whiteList], if provided, must be a non-empty array",
+      error: "Whitelist [whiteList], if provided, must be a non-empty array",
     });
   }
 
   try {
     await geo(ip)
       .then((geoRes: any) => {
-        if (geoRes.error) {
-          res.status(500);
-          res.send(geoRes.error);
-        }
         let resBody: any = {
           country: geoRes.country.isoCode,
         };
@@ -52,8 +51,8 @@ router.get("/", async function (req: Request, res: Response) {
           res.status(202);
           res.send({
             ...resBody,
-            message: "Location allowed",
             accessGranted: true,
+            message: "Location allowed",
             whiteListProvided: false,
           });
         }
@@ -61,8 +60,8 @@ router.get("/", async function (req: Request, res: Response) {
           res.status(202);
           res.send({
             country: geoRes.country.isoCode,
-            message: "Location allowed",
             accessGranted: true,
+            message: "Location allowed",
             whiteListProvided: true,
           });
         } else if (!whiteList.includes(geoRes.country.isoCode)) {
@@ -84,7 +83,13 @@ router.get("/", async function (req: Request, res: Response) {
       })
       .catch((e: any) => {
         res.status(500);
-        res.send(e);
+        if (e.error) {
+          if (e.code?.includes("INVALID")) res.status(400);
+          else res.status(500);
+          res.send({ error: e.code });
+        } else {
+          logger("error", e);
+        }
       });
   } catch (e) {
     res.status(500);
