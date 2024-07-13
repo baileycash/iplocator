@@ -1,0 +1,31 @@
+{
+  "name": "iplocator-server",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "npx tsc",
+    "start": "node dist/index.js",
+    "dev": "nodemon src/index.ts"
+  },
+  "main": "dist/index.js",
+  "dependencies": {
+    "@maxmind/geoip2-node": "^5.0.0",
+    "@types/redis": "^4.0.11",
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
+    "eslint": "^9.7.0",
+    "express": "^4.19.2",
+    "http-errors": "~1.6.3",
+    "morgan": "^1.10.0",
+    "nconf": "^0.12.1",
+    "nconf-yaml": "^1.0.2",
+    "redis": "^4.6.15"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.14.10",
+    "nodemon": "^3.1.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.5.3"
+  }
+}
